@@ -10,7 +10,7 @@ public class DemoScene : MonoBehaviour
 	public float runSpeed = 8f;
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
-	public float jumpHeight = 3f;
+	public float jumpVelocity = 3f;
 
 	[HideInInspector]
 	private float normalizedHorizontalSpeed = 0;
@@ -59,7 +59,6 @@ public class DemoScene : MonoBehaviour
 
 	#endregion
 
-
 	// the Update loop contains a very simple example of moving the character around and controlling the animation
 	void Update()
 	{
@@ -92,14 +91,19 @@ public class DemoScene : MonoBehaviour
 				_animator.Play( Animator.StringToHash( "Idle" ) );
 		}
 
-
 		// we can only jump whilst grounded
-		if( _controller.isGrounded && Input.GetKeyDown( KeyCode.UpArrow ) )
+		if( _controller.isGrounded && Input.GetButtonDown("Jump"))
 		{
-			_velocity.y = Mathf.Sqrt( 2f * jumpHeight * -gravity );
+			_velocity.y = jumpVelocity;
+//			_velocity.y = Mathf.Sqrt( 2f * jumpHeight * -gravity );
 			_animator.Play( Animator.StringToHash( "Jump" ) );
 		}
 
+		// note: need logic to avoid cutting upward velocity if it was not from a jump
+		if (Input.GetButtonUp("Jump") && _velocity.y > 0)
+		{
+			_velocity.y = 0;
+		}
 
 		// apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
 		var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
